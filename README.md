@@ -7,3 +7,5 @@ Liten kommandolinjeapp for å legge til, liste og fullføre oppgaver.
 python todo.py list
 python todo.py add "Kjøpe kaffe"
 python todo.py done 0
+
+Oppdatert tittel og beskrivelse.
