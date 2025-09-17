@@ -16,8 +16,14 @@ def test_add_and_list(tmp_path):
 
 def test_done_marks_item(tmp_path):
     todo = use_tmp_db(tmp_path)
-    todo.add("A")
-    todo.add("B")
+    todo.add("A"); todo.add("B")
     todo.done(1)
     data = todo.load()
     assert data[1]["done"] is True
+
+def test_remove_deletes_item(tmp_path):
+    todo = use_tmp_db(tmp_path)
+    todo.add("A"); todo.add("B"); todo.add("C")
+    todo.remove(1)  # fjern "B"
+    data = todo.load()
+    assert [it["title"] for it in data] == ["A", "C"]

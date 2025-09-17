@@ -1,6 +1,5 @@
-from __future__ import annotations
-import argparse
-import json
+﻿from __future__ import annotations
+import argparse, json
 from pathlib import Path
 from typing import List, Dict, Any
 
@@ -27,6 +26,13 @@ def done(idx: int) -> None:
     items[idx]["done"] = True
     save(items)
 
+def remove(idx: int) -> None:
+    items = load()
+    if idx < 0 or idx >= len(items):
+        raise IndexError("Ugyldig indeks.")
+    items.pop(idx)
+    save(items)
+
 def list_items() -> None:
     items = load()
     if not items:
@@ -38,6 +44,7 @@ def list_items() -> None:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="todo", description="En enkel Todo CLI")
+    parser.add_argument("--db", type=str, default=None, help="Sti til JSON-database (valgfritt)")
     sub = parser.add_subparsers(dest="cmd")
 
     p_add = sub.add_parser("add", help="Legg til en oppgave")
@@ -46,15 +53,24 @@ def main(argv: list[str] | None = None) -> int:
     p_done = sub.add_parser("done", help="Marker som utført")
     p_done.add_argument("index", type=int, help="Indeks (se 'list')")
 
+    p_remove = sub.add_parser("remove", help="Fjern en oppgave")
+    p_remove.add_argument("index", type=int, help="Indeks (se 'list')")
+
     sub.add_parser("list", help="Vis oppgaver")
 
-    ns = parser.parse_args(argv)
-
     try:
+        ns = parser.parse_args(argv)
+        if ns.db:
+            # Tillat custom databasefil
+            global DB
+            DB = Path(ns.db)
+
         if ns.cmd == "add":
             add(" ".join(ns.title))
         elif ns.cmd == "done":
             done(ns.index)
+        elif ns.cmd == "remove":
+            remove(ns.index)
         else:
             list_items()
     except (ValueError, IndexError) as e:
