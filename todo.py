@@ -33,8 +33,11 @@ def remove(idx: int) -> None:
     items.pop(idx)
     save(items)
 
-def list_items() -> None:
+def list_items(as_json: bool = False) -> None:
     items = load()
+    if as_json:
+        print(json.dumps(items, indent=2, ensure_ascii=False))
+        return
     if not items:
         print("(ingen oppgaver)")
         return
@@ -56,7 +59,8 @@ def main(argv: list[str] | None = None) -> int:
     p_remove = sub.add_parser("remove", help="Fjern en oppgave")
     p_remove.add_argument("index", type=int, help="Indeks (se 'list')")
 
-    sub.add_parser("list", help="Vis oppgaver")
+    p_list = sub.add_parser("list", help="Vis oppgaver")
+    p_list.add_argument("--json", action="store_true", help="Vis JSON-utskrift")
 
     try:
         ns = parser.parse_args(argv)
@@ -72,7 +76,7 @@ def main(argv: list[str] | None = None) -> int:
         elif ns.cmd == "remove":
             remove(ns.index)
         else:
-            list_items()
+            list_items(as_json=getattr(ns, "json", False))
     except (ValueError, IndexError) as e:
         print(f"Feil: {e}")
         return 1
