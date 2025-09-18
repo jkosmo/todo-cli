@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "todo-cli-jkosmo"
+version = "0.1.0"
+description = "Simple TODO CLI with JSON storage"
+readme = "README.md"
+authors = [{name="Joakim Kosmo", email="joakim.kosmo@gmail.com"}]
+requires-python = ">=3.11"
+dependencies = []
+
+[project.scripts]
+todo = "todo:main"
+
+[tool.setuptools]
+py-modules = ["todo"]
