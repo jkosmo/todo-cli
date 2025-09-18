@@ -37,9 +37,11 @@ def remove(idx: int) -> None:
     items.pop(idx)
     save(items)
 
-def list_items(json_mode: bool = False) -> None:
+def list_items(*, as_json: bool | None = None, json_mode: bool | None = None) -> None:
     items = load()
-    if json_mode:
+    flag = as_json if as_json is not None else bool(json_mode)
+    if flag:
+        import json
         print(json.dumps(items, ensure_ascii=False, indent=2))
         return
     if not items:
@@ -48,6 +50,7 @@ def list_items(json_mode: bool = False) -> None:
     for i, it in enumerate(items):
         mark = "[x]" if it.get("done") else "[ ]"
         print(f"{i}: {mark} {it.get('title','')}")
+
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="todo", description="En enkel Todo CLI")
@@ -79,7 +82,7 @@ def main(argv: list[str] | None = None) -> int:
         elif ns.cmd == "remove":
             remove(ns.index)
         else:
-            list_items(json_mode=bool(getattr(ns, "json", False)))
+            list_items(as_json=bool(getattr(ns, "json", False)))
     except (ValueError, IndexError) as e:
         print(f"Feil: {e}")
         return 1
