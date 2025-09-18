@@ -37,6 +37,16 @@ def remove(idx: int) -> None:
     items.pop(idx)
     save(items)
 
+def edit(idx: int, new_title: str) -> None:
+    items = load()
+    if idx < 0 or idx >= len(items):
+        raise IndexError("Ugyldig indeks.")
+    title = new_title.strip()
+    if not title:
+        raise ValueError("Tittel kan ikke være tom.")
+    items[idx]["title"] = title
+    save(items)
+
 def list_items(*, as_json: bool | None = None, json_mode: bool | None = None) -> None:
     items = load()
     flag = as_json if as_json is not None else bool(json_mode)
@@ -67,6 +77,10 @@ def main(argv: list[str] | None = None) -> int:
     p_remove = sub.add_parser("remove", help="Fjern en oppgave")
     p_remove.add_argument("index", type=int, help="Indeks (se 'list')")
 
+    p_edit = sub.add_parser("edit", help="Rediger en oppgave")
+    p_edit.add_argument("index", type=int, help="Indeks (se 'list')")
+    p_edit.add_argument("title", nargs="+", help="Ny tittel")
+
     sub.add_parser("list", help="Vis oppgaver")
 
     try:
@@ -81,6 +95,8 @@ def main(argv: list[str] | None = None) -> int:
             done(ns.index)
         elif ns.cmd == "remove":
             remove(ns.index)
+        elif ns.cmd == "edit":
+            edit(ns.index, " ".join(ns.title))
         else:
             list_items(as_json=bool(getattr(ns, "json", False)))
     except (ValueError, IndexError) as e:

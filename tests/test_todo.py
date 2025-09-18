@@ -2,6 +2,8 @@
 import json
 from pathlib import Path
 
+import pytest
+
 def use_tmp_db(tmp_path: Path):
     mod = importlib.import_module("todo")
     mod.DB = tmp_path / "todo.json"
@@ -45,3 +47,24 @@ def test_list_items_outputs_json(tmp_path, capsys):
         {"title": "A", "done": False},
         {"title": "B", "done": False},
     ]
+
+def test_edit_changes_title(tmp_path):
+    todo = use_tmp_db(tmp_path)
+    todo.add("Gammel tittel")
+    todo.edit(0, "Ny tittel")
+    items = todo.load()
+    assert items[0]["title"] == "Ny tittel"
+    assert items[0]["done"] is False
+
+def test_edit_invalid_index_raises(tmp_path):
+    todo = use_tmp_db(tmp_path)
+    todo.add("A")
+    with pytest.raises(IndexError):
+        todo.edit(1, "skal feile")
+
+def test_edit_empty_title_raises(tmp_path):
+    todo = use_tmp_db(tmp_path)
+    todo.add("A")
+    with pytest.raises(ValueError):
+        todo.edit(0, "   ")
+    assert todo.load()[0]["title"] == "A"
