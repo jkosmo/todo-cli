@@ -6,7 +6,11 @@ from typing import List, Dict, Any
 DB: Path = Path(__file__).with_name("todo.json")
 
 def load() -> List[Dict[str, Any]]:
-    return json.loads(DB.read_text("utf-8")) if DB.exists() and DB.read_text().strip() else []
+    if DB.exists():
+        text = DB.read_text(encoding="utf-8")
+        if text.strip():
+            return json.loads(text)
+    return []
 
 def save(items: List[Dict[str, Any]]) -> None:
     DB.write_text(json.dumps(items, indent=2, ensure_ascii=False), encoding="utf-8")
@@ -33,10 +37,10 @@ def remove(idx: int) -> None:
     items.pop(idx)
     save(items)
 
-def list_items(as_json: bool = False) -> None:
+def list_items(json_mode: bool = False) -> None:
     items = load()
-    if as_json:
-        print(json.dumps(items, indent=2, ensure_ascii=False))
+    if json_mode:
+        print(json.dumps(items, ensure_ascii=False, indent=2))
         return
     if not items:
         print("(ingen oppgaver)")
@@ -48,6 +52,7 @@ def list_items(as_json: bool = False) -> None:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="todo", description="En enkel Todo CLI")
     parser.add_argument("--db", type=str, default=None, help="Sti til JSON-database (valgfritt)")
+    parser.add_argument("--json", action="store_true", help="Skriv ut JSON ved 'list'")
     sub = parser.add_subparsers(dest="cmd")
 
     p_add = sub.add_parser("add", help="Legg til en oppgave")
@@ -59,13 +64,11 @@ def main(argv: list[str] | None = None) -> int:
     p_remove = sub.add_parser("remove", help="Fjern en oppgave")
     p_remove.add_argument("index", type=int, help="Indeks (se 'list')")
 
-    p_list = sub.add_parser("list", help="Vis oppgaver")
-    p_list.add_argument("--json", action="store_true", help="Vis JSON-utskrift")
+    sub.add_parser("list", help="Vis oppgaver")
 
     try:
         ns = parser.parse_args(argv)
         if ns.db:
-            # Tillat custom databasefil
             global DB
             DB = Path(ns.db)
 
@@ -76,7 +79,7 @@ def main(argv: list[str] | None = None) -> int:
         elif ns.cmd == "remove":
             remove(ns.index)
         else:
-            list_items(as_json=getattr(ns, "json", False))
+            list_items(json_mode=bool(getattr(ns, "json", False)))
     except (ValueError, IndexError) as e:
         print(f"Feil: {e}")
         return 1
