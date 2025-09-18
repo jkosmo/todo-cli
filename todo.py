@@ -6,7 +6,11 @@ from typing import List, Dict, Any
 DB: Path = Path(__file__).with_name("todo.json")
 
 def load() -> List[Dict[str, Any]]:
-    return json.loads(DB.read_text("utf-8")) if DB.exists() and DB.read_text().strip() else []
+    if DB.exists():
+        text = DB.read_text(encoding="utf-8")
+        if text.strip():
+            return json.loads(text)
+    return []
 
 def save(items: List[Dict[str, Any]]) -> None:
     DB.write_text(json.dumps(items, indent=2, ensure_ascii=False), encoding="utf-8")
@@ -33,8 +37,11 @@ def remove(idx: int) -> None:
     items.pop(idx)
     save(items)
 
-def list_items() -> None:
+def list_items(json_mode: bool = False) -> None:
     items = load()
+    if json_mode:
+        print(json.dumps(items, ensure_ascii=False, indent=2))
+        return
     if not items:
         print("(ingen oppgaver)")
         return
@@ -45,6 +52,7 @@ def list_items() -> None:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="todo", description="En enkel Todo CLI")
     parser.add_argument("--db", type=str, default=None, help="Sti til JSON-database (valgfritt)")
+    parser.add_argument("--json", action="store_true", help="Skriv ut JSON ved 'list'")
     sub = parser.add_subparsers(dest="cmd")
 
     p_add = sub.add_parser("add", help="Legg til en oppgave")
@@ -61,7 +69,6 @@ def main(argv: list[str] | None = None) -> int:
     try:
         ns = parser.parse_args(argv)
         if ns.db:
-            # Tillat custom databasefil
             global DB
             DB = Path(ns.db)
 
@@ -72,7 +79,7 @@ def main(argv: list[str] | None = None) -> int:
         elif ns.cmd == "remove":
             remove(ns.index)
         else:
-            list_items()
+            list_items(json_mode=bool(getattr(ns, "json", False)))
     except (ValueError, IndexError) as e:
         print(f"Feil: {e}")
         return 1

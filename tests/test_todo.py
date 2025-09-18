@@ -1,4 +1,5 @@
 ﻿import importlib
+import json
 from pathlib import Path
 
 def use_tmp_db(tmp_path: Path):
@@ -27,3 +28,20 @@ def test_remove_deletes_item(tmp_path):
     todo.remove(1)  # fjern "B"
     data = todo.load()
     assert [it["title"] for it in data] == ["A", "C"]
+
+def test_list_items_reports_empty(tmp_path, capsys):
+    todo = use_tmp_db(tmp_path)
+    todo.list_items()
+    captured = capsys.readouterr()
+    assert "(ingen oppgaver)" in captured.out
+
+def test_list_items_outputs_json(tmp_path, capsys):
+    todo = use_tmp_db(tmp_path)
+    todo.add("A"); todo.add("B")
+    todo.list_items(as_json=True)
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+    assert payload == [
+        {"title": "A", "done": False},
+        {"title": "B", "done": False},
+    ]
