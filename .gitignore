@@ -18,5 +18,6 @@ build/
 .tmp/
 tmp/
 .pytest_cache/
+C:/Users/*/AppData/Local/Temp/pytest-of-*/
 # Local data files
 todo.json
