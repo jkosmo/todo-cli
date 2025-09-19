@@ -14,3 +14,9 @@ ruff_cache/
 *.egg-info/
 dist/
 build/
+# Local temp & test artifacts
+.tmp/
+tmp/
+.pytest_cache/
+# Local data files
+todo.json
