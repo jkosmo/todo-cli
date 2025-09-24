@@ -4,6 +4,7 @@
 build/
 dist/
 .venv/
+.pip-cache/
 .pytest_cache/
 .mypy_cache/
 ruff_cache/
@@ -20,3 +21,4 @@ tmp/
 .pytest_cache/
 # Local data files
 todo.json
+ .pip-cache/

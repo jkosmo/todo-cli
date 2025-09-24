@@ -1,9 +1,11 @@
 ﻿from __future__ import annotations
-import argparse, json
+import argparse
+import json
 from pathlib import Path
 from typing import List, Dict, Any
 
 DB: Path = Path(__file__).with_name("todo.json")
+
 
 def load() -> List[Dict[str, Any]]:
     if DB.exists():
@@ -12,8 +14,10 @@ def load() -> List[Dict[str, Any]]:
             return json.loads(text)
     return []
 
+
 def save(items: List[Dict[str, Any]]) -> None:
     DB.write_text(json.dumps(items, indent=2, ensure_ascii=False), encoding="utf-8")
+
 
 def add(title: str) -> None:
     title = title.strip()
@@ -23,6 +27,7 @@ def add(title: str) -> None:
     items.append({"title": title, "done": False})
     save(items)
 
+
 def done(idx: int) -> None:
     items = load()
     if idx < 0 or idx >= len(items):
@@ -30,12 +35,14 @@ def done(idx: int) -> None:
     items[idx]["done"] = True
     save(items)
 
+
 def remove(idx: int) -> None:
     items = load()
     if idx < 0 or idx >= len(items):
         raise IndexError("Ugyldig indeks.")
     items.pop(idx)
     save(items)
+
 
 def edit(idx: int, new_title: str) -> None:
     items = load()
@@ -47,11 +54,13 @@ def edit(idx: int, new_title: str) -> None:
     items[idx]["title"] = title
     save(items)
 
+
 def list_items(*, as_json: bool | None = None, json_mode: bool | None = None) -> None:
     items = load()
     flag = as_json if as_json is not None else bool(json_mode)
     if flag:
         import json
+
         print(json.dumps(items, ensure_ascii=False, indent=2))
         return
     if not items:
@@ -64,7 +73,9 @@ def list_items(*, as_json: bool | None = None, json_mode: bool | None = None) ->
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="todo", description="En enkel Todo CLI")
-    parser.add_argument("--db", type=str, default=None, help="Sti til JSON-database (valgfritt)")
+    parser.add_argument(
+        "--db", type=str, default=None, help="Sti til JSON-database (valgfritt)"
+    )
     parser.add_argument("--json", action="store_true", help="Skriv ut JSON ved 'list'")
     sub = parser.add_subparsers(dest="cmd")
 
@@ -103,6 +114,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Feil: {e}")
         return 1
     return 0
+
 
 if __name__ == "__main__":
     raise SystemExit(main())
