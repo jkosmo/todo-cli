@@ -16,3 +16,6 @@ todo = "todo:main"
 
 [tool.setuptools]
 py-modules = ["todo"]
+
+[tool.setuptools.package-dir]
+"" = "src"
